@@ -2,6 +2,8 @@ package main
 
 import (
 	"clean-go/controller"
+	"clean-go/repository"
+	"clean-go/service"
 	"log"
 	"net/http"
 
@@ -9,7 +11,9 @@ import (
 )
 
 var (
-	postController controller.PostController = controller.NewPostController()
+	postRepository repository.PostRepository = repository.NewFirestoreRepo()
+	postService    service.PostService       = service.NewPostService(postRepository)
+	postController controller.PostController = controller.NewPostController(postService)
 )
 
 func main() {

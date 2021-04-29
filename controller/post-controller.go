@@ -3,6 +3,7 @@ package controller
 import (
 	"clean-go/entity"
 	"clean-go/service"
+
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,10 +17,11 @@ type PostController interface {
 }
 
 var (
-	postService service.PostService = service.NewPostService()
+	postService service.PostService
 )
 
-func NewPostController() PostController {
+func NewPostController(service service.PostService) PostController {
+	postService = service
 	return &contoller{}
 }
 
