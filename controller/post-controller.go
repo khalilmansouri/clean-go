@@ -4,7 +4,7 @@ import (
 	"clean-go/entity"
 	"clean-go/service"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 )
 
@@ -16,7 +16,7 @@ type PostController interface {
 }
 
 var (
-	serv service.PostService = service.NewPostService()
+	postService service.PostService = service.NewPostService()
 )
 
 func NewPostController() PostController {
@@ -27,18 +27,17 @@ func NewPostController() PostController {
 func (*contoller) GetPosts(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-type", "application/json")
 
-	posts, err := serv.FindAll()
+	posts, err := postService.FindAll()
 	if err != nil {
-		log.Fatalf("Failed to fetch posts : %v", err)
 		response.WriteHeader(http.StatusInternalServerError)
-		response.Write([]byte(`{Failed to fetch posts}`))
+		json.NewEncoder(response).Encode(err.Error())
 		return
 	}
 
 	ret, err := json.Marshal(posts)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
-		response.Write([]byte(`{error: Marshelling Json }`))
+		json.NewEncoder(response).Encode(err.Error())
 		return
 	}
 
@@ -53,16 +52,23 @@ func (*contoller) AddPost(response http.ResponseWriter, request *http.Request) {
 	err := json.NewDecoder(request.Body).Decode(&post)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
-		response.Write([]byte(`{error: Marshelling Json }`))
+		json.NewEncoder(response).Encode(err.Error())
 		return
 	}
 
-	post, err = serv.Create(post)
+	err = postService.Validate(post)
+	if err != nil {
+		fmt.Println(err)
+		response.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(response).Encode(err.Error())
+		return
+	}
+
+	post, err = postService.Create(post)
 
 	if err != nil {
-		log.Fatalf("Failed to save Post %v", err)
 		response.WriteHeader(http.StatusInternalServerError)
-		response.Write([]byte(`{error: Failed to save Post }`))
+		json.NewEncoder(response).Encode(err.Error())
 		return
 	}
 
@@ -71,7 +77,8 @@ func (*contoller) AddPost(response http.ResponseWriter, request *http.Request) {
 	ret, err := json.Marshal(post)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
-		response.Write([]byte(`{error: Marshelling Json }`))
+		json.NewEncoder(response).Encode(err.Error())
+		// response.Write([]byte(`{error: Marshelling Json }`))
 		return
 	}
 	response.Write(ret)

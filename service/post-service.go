@@ -25,7 +25,13 @@ func NewPostService() PostService {
 
 func (*service) Validate(post *entity.Post) error {
 	if post == nil {
-		return errors.New("post is empty")
+		return errors.New(":Post is empty")
+	}
+	if post.Text == "" {
+		return errors.New(":Text is required")
+	}
+	if post.Title == "" {
+		return errors.New(":Title post is empty")
 	}
 	return nil
 }
