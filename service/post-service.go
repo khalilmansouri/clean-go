@@ -26,13 +26,13 @@ func NewPostService(repository repository.PostRepository) PostService {
 
 func (*service) Validate(post *entity.Post) error {
 	if post == nil {
-		return errors.New(":Post is empty")
+		return errors.New("post is empty")
 	}
 	if post.Text == "" {
-		return errors.New(":Text is required")
+		return errors.New("text is required")
 	}
 	if post.Title == "" {
-		return errors.New(":Title post is empty")
+		return errors.New("title is required")
 	}
 	return nil
 }
